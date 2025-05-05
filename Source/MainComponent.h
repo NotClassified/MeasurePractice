@@ -26,14 +26,34 @@ public:
         juce::File saveFile(getSavePath() + "\\SaveData.xml");
         if (!saveFile.exists())
         {
+            saveData = juce::ValueTree("SaveData");
             flushSaveData();
             return;
         }
 
         saveData = juce::ValueTree::fromXml(saveFile.loadFileAsString());
     }
+    void applySaveData()
+    {
+        if (!saveData.isValid())
+            return;
+        
+        juce::var loadData;
 
-    juce::ValueTree saveData{ "SaveData" };
+        applyLoadedData(saveData.getProperty(XmlID::SongName), songNameEditor);
+
+        if (applyLoadedData(saveData.getProperty(XmlID::MeasureCount), measureCountEditor))
+            updateMeasureDropdowns();
+
+        applyLoadedData(saveData.getProperty(XmlID::StartMeasure), startMeasureDropdown);
+        applyLoadedData(saveData.getProperty(XmlID::EndMeasure), endMeasureDropdown);
+        applyLoadedData(saveData.getProperty(XmlID::SectionMeasureCount), sectionMeasureCountDropdown);
+
+        if (applyLoadedData(saveData.getProperty(XmlID::CurrentSection), currentSectionIndex))
+            updateSection();
+    }
+
+    juce::ValueTree saveData;
 
     struct XmlID
     {
@@ -46,20 +66,31 @@ public:
 
     };
 
-    void updateMeasureDropdown(juce::ComboBox& dropdown, int newMeasureCount)
+    void updateMeasureDropdown(juce::ComboBox& dropdown, juce::StringArray& itemList)
     {
         int previousValue = dropdown.getSelectedId();
         if (previousValue == 0)
             previousValue = 1;
-        if (previousValue > newMeasureCount)
-            previousValue = newMeasureCount;
+        if (previousValue > itemList.size())
+            previousValue = itemList.size();
 
         dropdown.clear();
-        for (int i = 1; i <= newMeasureCount; i++)
-        {
-            dropdown.addItem(toString(i), i);
-        }
+        dropdown.addItemList(itemList, 1);
         dropdown.setSelectedId(previousValue);
+    }
+    void updateMeasureDropdowns()
+    {
+        int measureCount = measureCountEditor.getText().getIntValue();
+        juce::StringArray itemList;
+        itemList.ensureStorageAllocated(measureCount);
+        for (int i = 1; i <+ measureCount; i++)
+        {
+            itemList.add(toString(i));
+        }
+
+        updateMeasureDropdown(startMeasureDropdown, itemList);
+        updateMeasureDropdown(endMeasureDropdown, itemList);
+        updateMeasureDropdown(sectionMeasureCountDropdown, itemList);
     }
 
     void updateSection() { changeSection(0); }
@@ -100,7 +131,6 @@ public:
             if (isSectionFinished(startMeasure, endMeasure, sectionLength))
             {
                 currentSectionIndex = previousSectionIndex;
-                currentSectionView.setText("Finished!");
                 return;
             }
 

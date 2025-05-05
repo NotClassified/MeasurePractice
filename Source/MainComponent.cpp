@@ -11,18 +11,13 @@ MainComponent::MainComponent()
         saveData.setProperty(XmlID::SongName, songNameEditor.getText(), nullptr);
         flushSaveData();
     };
-
     
     addAndMakeVisible(titleManager.addTitle(measureCountEditor, "Measure Count"));
     addAndMakeVisible(measureCountEditor);
-    measureCountEditor.setFont(getMonoFont(36.f));
+    measureCountEditor.setFont(getMonoFont(75));
     measureCountEditor.onTextChange = [=]
     {
-        int measureCount = measureCountEditor.getText().getIntValue();
-        updateMeasureDropdown(startMeasureDropdown, measureCount);
-        updateMeasureDropdown(endMeasureDropdown, measureCount);
-        updateMeasureDropdown(sectionMeasureCountDropdown, measureCount);
-
+        updateMeasureDropdowns();
         saveData.setProperty(XmlID::MeasureCount, measureCountEditor.getText().getIntValue(), nullptr);
         flushSaveData();
     };
@@ -58,7 +53,7 @@ MainComponent::MainComponent()
     previousSection.onClick = [=]
     {
         changeSection(-1);
-        saveData.setProperty(XmlID::SectionMeasureCount, currentSectionIndex, nullptr);
+        saveData.setProperty(XmlID::CurrentSection, currentSectionIndex, nullptr);
         flushSaveData();
     };
 
@@ -66,14 +61,18 @@ MainComponent::MainComponent()
     nextSection.onClick = [=]
     {
         changeSection(1);
-        saveData.setProperty(XmlID::SectionMeasureCount, currentSectionIndex, nullptr);
+        saveData.setProperty(XmlID::CurrentSection, currentSectionIndex, nullptr);
         flushSaveData();
     };
 
     addAndMakeVisible(titleManager.addTitle(currentSectionView, "Current Section"));
     addAndMakeVisible(currentSectionView);
-    currentSectionView.setFont(getMonoFont(36.f));
+    currentSectionView.setFont(getMonoFont(75));
     currentSectionView.setReadOnly(true);
+
+
+    loadSaveData();
+    applySaveData();
 
     setSize (600, 400);
 }
@@ -95,26 +94,26 @@ void MainComponent::resized()
 
     songNameEditor.setBounds(localBounds.removeFromTop(25));
     {
-        Bounds titleBounds = localBounds.removeFromTop(50);
-        Bounds bounds2 = localBounds.removeFromTop(50);
+        Bounds titleBounds = localBounds.removeFromTop(100);
+        Bounds bounds2 = localBounds.removeFromTop(100);
 
-        titleManager.setTitleBounds(measureCountEditor, titleBounds.removeFromLeft(150));
-        measureCountEditor.setBounds(bounds2.removeFromLeft(150));
+        titleManager.setTitleBounds(measureCountEditor, titleBounds.removeFromLeft(300));
+        measureCountEditor.setBounds(bounds2.removeFromLeft(300));
 
-        titleManager.setTitleBounds(startMeasureDropdown, titleBounds.removeFromLeft(150));
-        startMeasureDropdown.setBounds(bounds2.removeFromLeft(150));
+        titleManager.setTitleBounds(startMeasureDropdown, titleBounds.removeFromLeft(300));
+        startMeasureDropdown.setBounds(bounds2.removeFromLeft(300));
 
-        titleManager.setTitleBounds(endMeasureDropdown, titleBounds.removeFromLeft(150));
-        endMeasureDropdown.setBounds(bounds2.removeFromLeft(150));
+        titleManager.setTitleBounds(endMeasureDropdown, titleBounds.removeFromLeft(300));
+        endMeasureDropdown.setBounds(bounds2.removeFromLeft(300));
 
-        titleManager.setTitleBounds(sectionMeasureCountDropdown, titleBounds.removeFromLeft(150));
-        sectionMeasureCountDropdown.setBounds(bounds2.removeFromLeft(150));
+        titleManager.setTitleBounds(sectionMeasureCountDropdown, titleBounds.removeFromLeft(300));
+        sectionMeasureCountDropdown.setBounds(bounds2.removeFromLeft(300));
 
     }
     {
-        Bounds bounds2 = localBounds.removeFromTop(50);
-        previousSection.setBounds(bounds2.removeFromLeft(50));
-        nextSection.setBounds(bounds2.removeFromLeft(50));
+        Bounds bounds2 = localBounds.removeFromTop(100);
+        previousSection.setBounds(bounds2.removeFromLeft(100));
+        nextSection.setBounds(bounds2.removeFromLeft(100));
     }
-    currentSectionView.setBounds(localBounds.removeFromTop(50).removeFromLeft(300));
+    currentSectionView.setBounds(localBounds.removeFromTop(100).removeFromLeft(600));
 }

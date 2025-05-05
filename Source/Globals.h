@@ -44,6 +44,26 @@ inline juce::XmlElement::TextFormat getXmlNoWrapFormat()
 	return format;
 }
 
+template <class OutputType>
+inline bool applyLoadedData(const juce::var& loadData, OutputType& output)
+{
+	if (!loadData.isVoid())
+		output = loadData;
+	return !loadData.isVoid();
+}
+inline bool applyLoadedData(const juce::var& loadData, juce::TextEditor& output, juce::NotificationType notify = juce::dontSendNotification)
+{
+	if (!loadData.isVoid()) 
+		output.setText(loadData, notify);
+	return !loadData.isVoid();
+}
+inline bool applyLoadedData(const juce::var& loadData, juce::ComboBox& output, juce::NotificationType notify = juce::dontSendNotification)
+{
+	if (!loadData.isVoid()) 
+		output.setSelectedId(loadData, notify);
+	return !loadData.isVoid();
+}
+
 inline juce::String getSavePath()
 {
 	auto exeFolder = juce::File::getSpecialLocation(juce::File::SpecialLocationType::currentExecutableFile).getParentDirectory();
