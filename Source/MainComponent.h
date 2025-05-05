@@ -1,6 +1,7 @@
 #pragma once
 
 #include <JuceHeader.h>
+#include "Globals.h"
 
 //==============================================================================
 /*
@@ -14,14 +15,170 @@ public:
     MainComponent();
     ~MainComponent() override;
 
+    void flushSaveData()
+    {
+        juce::File saveFile(getSavePath() + "\\SaveData.xml");
+        saveFile.create();
+        saveFile.replaceWithText(saveData.toXmlString(getXmlNoWrapFormat()));
+    }
+    void loadSaveData()
+    {
+        juce::File saveFile(getSavePath() + "\\SaveData.xml");
+        if (!saveFile.exists())
+        {
+            flushSaveData();
+            return;
+        }
+
+        saveData = juce::ValueTree::fromXml(saveFile.loadFileAsString());
+    }
+
+    juce::ValueTree saveData{ "SaveData" };
+
+    struct XmlID
+    {
+        inline static const char* SongName = "SongName";
+        inline static const char* MeasureCount = "MeasureCount";
+        inline static const char* StartMeasure = "StartMeasure";
+        inline static const char* EndMeasure = "EndMeasure";
+        inline static const char* SectionMeasureCount = "SectionMeasureCount";
+        inline static const char* CurrentSection = "CurrentSection";
+
+    };
+
+    void updateMeasureDropdown(juce::ComboBox& dropdown, int newMeasureCount)
+    {
+        int previousValue = dropdown.getSelectedId();
+        if (previousValue == 0)
+            previousValue = 1;
+        if (previousValue > newMeasureCount)
+            previousValue = newMeasureCount;
+
+        dropdown.clear();
+        for (int i = 1; i <= newMeasureCount; i++)
+        {
+            dropdown.addItem(toString(i), i);
+        }
+        dropdown.setSelectedId(previousValue);
+    }
+
+    void updateSection() { changeSection(0); }
+    void changeSection(int increment)
+    {
+        if (measureCountEditor.getText().isEmpty())
+            return;
+
+        int previousSectionIndex = currentSectionIndex;
+        currentSectionIndex += increment;
+
+        int startMeasure = startMeasureDropdown.getSelectedId();
+        int endMeasure = endMeasureDropdown.getSelectedId();
+        int sectionLength = sectionMeasureCountDropdown.getSelectedId();
+        if (startMeasure == 0 || endMeasure == 0 || sectionLength == 0)
+            return;
+
+        int sectionStart = startMeasure + currentSectionIndex;
+        int sectionEnd = sectionStart + (sectionLength - 1);
+
+        if (currentSectionIndex < 0)
+        {
+            sectionLength--;
+            if (sectionLength <= 0)
+            {
+                currentSectionIndex = previousSectionIndex;
+                return;
+            }
+
+            sectionMeasureCountDropdown.setSelectedId(sectionLength, juce::dontSendNotification);
+            sectionEnd = endMeasure;
+            sectionStart = endMeasure - (sectionLength - 1);
+            currentSectionIndex = sectionStart - startMeasure;
+        }
+        else if (sectionEnd > endMeasure)
+        {
+            sectionLength++;
+            if (isSectionFinished(startMeasure, endMeasure, sectionLength))
+            {
+                currentSectionIndex = previousSectionIndex;
+                currentSectionView.setText("Finished!");
+                return;
+            }
+
+            sectionMeasureCountDropdown.setSelectedId(sectionLength, juce::dontSendNotification);
+            currentSectionIndex = 0;
+            sectionStart = startMeasure + currentSectionIndex;
+            sectionEnd = sectionStart + (sectionLength - 1);
+        }
+
+        currentSectionView.setText(toString(sectionStart) + "-" + toString(sectionEnd));
+    }
+
+    bool isSectionFinished(int startMeasure, int endMeasure, int sectionLength) { return endMeasure - startMeasure + 1 < sectionLength; }
+
+    int currentSectionIndex = 0;
+
     //==============================================================================
+    //UI
+
+    struct TitleManager
+    {
+        TitleManager() {}
+        ~TitleManager()
+        {
+            for (auto& c : m_titles)
+                delete c;
+        }
+
+        //returns the new title so that you can add it to a parent and make visible
+        juce::TextButton* addTitle(juce::Component* component, juce::String title) { return addTitle(*component, title); }
+        //returns the new title so that you can add it to a parent and make visible
+        juce::TextButton* addTitle(juce::Component& component, juce::String title)
+        {
+            jassert(!m_components.contains(&component)); //component shouldn't already have a title
+
+            auto newTitle = new juce::TextButton(title);
+            m_titles.add(newTitle);
+            m_components.add(&component);
+
+            return newTitle;
+        }
+
+        juce::TextButton* getTitle(juce::Component* component) { return getTitle(*component); }
+        juce::TextButton* getTitle(juce::Component& component)
+        {
+            for (size_t i = 0; i < m_titles.size(); i++)
+            {
+                if (m_components[i] == &component)
+                    return m_titles[i];
+            }
+            jassertfalse; //could not find title paired with this component
+            return nullptr;
+        }
+
+        void setTitleBounds(juce::Component* component, Bounds bounds) { getTitle(component)->setBounds(bounds); }
+        void setTitleBounds(juce::Component& component, Bounds bounds) { getTitle(component)->setBounds(bounds); }
+
+    private:
+        vArray<juce::TextButton*> m_titles;
+        vArray<juce::Component*> m_components;
+    };
+
     void paint (juce::Graphics&) override;
     void resized() override;
 
+    TitleManager titleManager;
+
+    vArray<juce::TextButton*> titles;
+
+    juce::TextEditor songNameEditor;
+    juce::TextEditor measureCountEditor;
+    juce::ComboBox startMeasureDropdown;
+    juce::ComboBox endMeasureDropdown;
+    juce::ComboBox sectionMeasureCountDropdown;
+    juce::TextButton previousSection{ "<" };
+    juce::TextButton nextSection{ ">" };
+    juce::TextEditor currentSectionView;
+
 private:
-    //==============================================================================
-    // Your private member variables go here...
-
-
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };

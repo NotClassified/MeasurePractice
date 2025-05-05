@@ -4,6 +4,12 @@
 
 #define NAME_OF(name) (#name)
 
+inline juce::String toString(int i) { return juce::String(i); }
+inline juce::String toString(size_t i) { return juce::String(i); }
+inline juce::String toString(float i) { return juce::String(i); }
+inline juce::String toString(double i) { return juce::String(i); }
+inline juce::String toString(bool i) { return i ? "true" : "false"; }
+
 inline juce::Font getMonoFont(float fontHeight = 14.f) { return juce::Font("Cascadia Mono", fontHeight, 0); }
 inline const juce::Colour g_defaultEditorColor = juce::Colour(38, 50, 56);
 
@@ -38,7 +44,7 @@ inline juce::XmlElement::TextFormat getXmlNoWrapFormat()
 	return format;
 }
 
-juce::String getSavePath()
+inline juce::String getSavePath()
 {
 	auto exeFolder = juce::File::getSpecialLocation(juce::File::SpecialLocationType::currentExecutableFile).getParentDirectory();
 	return exeFolder.getFullPathName() + "\\SaveData";
