@@ -83,7 +83,7 @@ public:
         int measureCount = measureCountEditor.getText().getIntValue();
         juce::StringArray itemList;
         itemList.ensureStorageAllocated(measureCount);
-        for (int i = 1; i <+ measureCount; i++)
+        for (int i = 1; i <= measureCount; i++)
         {
             itemList.add(toString(i));
         }

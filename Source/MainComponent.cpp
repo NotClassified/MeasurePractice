@@ -14,7 +14,7 @@ MainComponent::MainComponent()
     
     addAndMakeVisible(titleManager.addTitle(measureCountEditor, "Measure Count"));
     addAndMakeVisible(measureCountEditor);
-    measureCountEditor.setFont(getMonoFont(75));
+    measureCountEditor.setFont(getMonoFont());
     measureCountEditor.onTextChange = [=]
     {
         updateMeasureDropdowns();
@@ -24,6 +24,7 @@ MainComponent::MainComponent()
 
     addAndMakeVisible(titleManager.addTitle(startMeasureDropdown, "Start Measure"));
     addAndMakeVisible(startMeasureDropdown);
+    startMeasureDropdown.setEditableText(true);
     startMeasureDropdown.onChange = [=]
     {
         updateSection();
@@ -33,6 +34,7 @@ MainComponent::MainComponent()
 
     addAndMakeVisible(titleManager.addTitle(endMeasureDropdown, "End Measure"));
     addAndMakeVisible(endMeasureDropdown);
+    endMeasureDropdown.setEditableText(true);
     endMeasureDropdown.onChange = [=]
     {
         updateSection();
@@ -67,14 +69,17 @@ MainComponent::MainComponent()
 
     addAndMakeVisible(titleManager.addTitle(currentSectionView, "Current Section"));
     addAndMakeVisible(currentSectionView);
-    currentSectionView.setFont(getMonoFont(75));
+    currentSectionView.setFont(getMonoFont());
     currentSectionView.setReadOnly(true);
 
 
     loadSaveData();
     applySaveData();
 
-    setSize (600, 400);
+    for (auto& c : getChildren())
+        c->setTransform(juce::AffineTransform::scale(3.5f));
+
+    setSize (1400, 600);
 }
 
 MainComponent::~MainComponent()
@@ -92,28 +97,28 @@ void MainComponent::resized()
 {
     Bounds localBounds = getLocalBounds();
 
-    songNameEditor.setBounds(localBounds.removeFromTop(25));
+    songNameEditor.setBounds(localBounds.removeFromTop(25).withWidth(400));
     {
-        Bounds titleBounds = localBounds.removeFromTop(100);
-        Bounds bounds2 = localBounds.removeFromTop(100);
+        Bounds titleBounds = localBounds.removeFromTop(25);
+        Bounds bounds2 = localBounds.removeFromTop(25);
 
-        titleManager.setTitleBounds(measureCountEditor, titleBounds.removeFromLeft(300));
-        measureCountEditor.setBounds(bounds2.removeFromLeft(300));
+        titleManager.setTitleBounds(measureCountEditor, titleBounds.removeFromLeft(100));
+        measureCountEditor.setBounds(bounds2.removeFromLeft(100));
 
-        titleManager.setTitleBounds(startMeasureDropdown, titleBounds.removeFromLeft(300));
-        startMeasureDropdown.setBounds(bounds2.removeFromLeft(300));
+        titleManager.setTitleBounds(startMeasureDropdown, titleBounds.removeFromLeft(100));
+        startMeasureDropdown.setBounds(bounds2.removeFromLeft(100));
 
-        titleManager.setTitleBounds(endMeasureDropdown, titleBounds.removeFromLeft(300));
-        endMeasureDropdown.setBounds(bounds2.removeFromLeft(300));
+        titleManager.setTitleBounds(endMeasureDropdown, titleBounds.removeFromLeft(100));
+        endMeasureDropdown.setBounds(bounds2.removeFromLeft(100));
 
-        titleManager.setTitleBounds(sectionMeasureCountDropdown, titleBounds.removeFromLeft(300));
-        sectionMeasureCountDropdown.setBounds(bounds2.removeFromLeft(300));
+        titleManager.setTitleBounds(sectionMeasureCountDropdown, titleBounds.removeFromLeft(100));
+        sectionMeasureCountDropdown.setBounds(bounds2.removeFromLeft(100));
 
     }
     {
-        Bounds bounds2 = localBounds.removeFromTop(100);
-        previousSection.setBounds(bounds2.removeFromLeft(100));
-        nextSection.setBounds(bounds2.removeFromLeft(100));
+        Bounds bounds2 = localBounds.removeFromTop(25);
+        previousSection.setBounds(bounds2.removeFromLeft(25));
+        nextSection.setBounds(bounds2.removeFromLeft(25));
     }
-    currentSectionView.setBounds(localBounds.removeFromTop(100).removeFromLeft(600));
+    currentSectionView.setBounds(localBounds.removeFromTop(25).removeFromLeft(200));
 }
