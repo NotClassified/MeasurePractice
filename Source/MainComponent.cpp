@@ -8,7 +8,6 @@ MainComponent::MainComponent()
     songNameEditor.setTextToShowWhenEmpty("Song Name", juce::Colours::grey);
     songNameEditor.onTextChange = [=]
     {
-        saveData.setProperty(XmlID::SongName, songNameEditor.getText(), nullptr);
         flushSaveData();
     };
     
@@ -18,8 +17,6 @@ MainComponent::MainComponent()
     measureCountEditor.onTextChange = [=]
     {
         updateMeasureDropdowns();
-        saveData.setProperty(XmlID::MeasureCount, measureCountEditor.getText().getIntValue(), nullptr);
-        flushSaveData();
     };
 
     addAndMakeVisible(titleManager.addTitle(startMeasureDropdown, "Start Measure"));
@@ -27,9 +24,9 @@ MainComponent::MainComponent()
     startMeasureDropdown.setEditableText(true);
     startMeasureDropdown.onChange = [=]
     {
+        if (startMeasureDropdown.getSelectedId() == 0)
+            startMeasureDropdown.setSelectedId(startMeasureDropdown.getText().getIntValue(), juce::dontSendNotification);
         updateSection();
-        saveData.setProperty(XmlID::StartMeasure, startMeasureDropdown.getSelectedId(), nullptr);
-        flushSaveData();
     };
 
     addAndMakeVisible(titleManager.addTitle(endMeasureDropdown, "End Measure"));
@@ -37,9 +34,9 @@ MainComponent::MainComponent()
     endMeasureDropdown.setEditableText(true);
     endMeasureDropdown.onChange = [=]
     {
+        if (endMeasureDropdown.getSelectedId() == 0)
+            endMeasureDropdown.setSelectedId(endMeasureDropdown.getText().getIntValue(), juce::dontSendNotification);
         updateSection();
-        saveData.setProperty(XmlID::EndMeasure, endMeasureDropdown.getSelectedId(), nullptr);
-        flushSaveData();
     };
 
     addAndMakeVisible(titleManager.addTitle(sectionMeasureCountDropdown, "Section Length"));
@@ -47,24 +44,18 @@ MainComponent::MainComponent()
     sectionMeasureCountDropdown.onChange = [=]
     {
         updateSection();
-        saveData.setProperty(XmlID::SectionMeasureCount, sectionMeasureCountDropdown.getSelectedId(), nullptr);
-        flushSaveData();
     };
 
     addAndMakeVisible(previousSection);
     previousSection.onClick = [=]
     {
         changeSection(-1);
-        saveData.setProperty(XmlID::CurrentSection, currentSectionIndex, nullptr);
-        flushSaveData();
     };
 
     addAndMakeVisible(nextSection);
     nextSection.onClick = [=]
     {
         changeSection(1);
-        saveData.setProperty(XmlID::CurrentSection, currentSectionIndex, nullptr);
-        flushSaveData();
     };
 
     addAndMakeVisible(titleManager.addTitle(currentSectionView, "Current Section"));
@@ -72,14 +63,13 @@ MainComponent::MainComponent()
     currentSectionView.setFont(getMonoFont());
     currentSectionView.setReadOnly(true);
 
-
-    loadSaveData();
-    applySaveData();
-
     for (auto& c : getChildren())
         c->setTransform(juce::AffineTransform::scale(3.5f));
-
     setSize (1400, 600);
+
+
+    loadSaveData();
+    updateSection();
 }
 
 MainComponent::~MainComponent()

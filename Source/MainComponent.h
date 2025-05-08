@@ -17,6 +17,13 @@ public:
 
     void flushSaveData()
     {
+        saveData.setProperty(XmlID::SongName, songNameEditor.getText(), nullptr);
+        saveData.setProperty(XmlID::MeasureCount, measureCountEditor.getText().getIntValue(), nullptr);
+        saveData.setProperty(XmlID::StartMeasure, startMeasureDropdown.getSelectedId(), nullptr);
+        saveData.setProperty(XmlID::EndMeasure, endMeasureDropdown.getSelectedId(), nullptr);
+        saveData.setProperty(XmlID::SectionMeasureCount, sectionMeasureCountDropdown.getSelectedId(), nullptr);
+        saveData.setProperty(XmlID::CurrentSection, currentSectionIndex, nullptr);
+
         juce::File saveFile(getSavePath() + "\\SaveData.xml");
         saveFile.create();
         saveFile.replaceWithText(saveData.toXmlString(getXmlNoWrapFormat()));
@@ -32,25 +39,18 @@ public:
         }
 
         saveData = juce::ValueTree::fromXml(saveFile.loadFileAsString());
-    }
-    void applySaveData()
-    {
         if (!saveData.isValid())
             return;
-        
-        juce::var loadData;
 
         applyLoadedData(saveData.getProperty(XmlID::SongName), songNameEditor);
 
         if (applyLoadedData(saveData.getProperty(XmlID::MeasureCount), measureCountEditor))
-            updateMeasureDropdowns();
+            updateMeasureDropdowns(false);
 
         applyLoadedData(saveData.getProperty(XmlID::StartMeasure), startMeasureDropdown);
         applyLoadedData(saveData.getProperty(XmlID::EndMeasure), endMeasureDropdown);
         applyLoadedData(saveData.getProperty(XmlID::SectionMeasureCount), sectionMeasureCountDropdown);
-
-        if (applyLoadedData(saveData.getProperty(XmlID::CurrentSection), currentSectionIndex))
-            updateSection();
+        applyLoadedData(saveData.getProperty(XmlID::CurrentSection), currentSectionIndex);
     }
 
     juce::ValueTree saveData;
@@ -76,9 +76,9 @@ public:
 
         dropdown.clear();
         dropdown.addItemList(itemList, 1);
-        dropdown.setSelectedId(previousValue);
+        dropdown.setSelectedId(previousValue, juce::dontSendNotification);
     }
-    void updateMeasureDropdowns()
+    void updateMeasureDropdowns(bool notifySectionView = true)
     {
         int measureCount = measureCountEditor.getText().getIntValue();
         juce::StringArray itemList;
@@ -91,6 +91,9 @@ public:
         updateMeasureDropdown(startMeasureDropdown, itemList);
         updateMeasureDropdown(endMeasureDropdown, itemList);
         updateMeasureDropdown(sectionMeasureCountDropdown, itemList);
+
+        if (notifySectionView)
+            updateSection();
     }
 
     void updateSection() { changeSection(0); }
@@ -141,6 +144,7 @@ public:
         }
 
         currentSectionView.setText(toString(sectionStart) + "-" + toString(sectionEnd));
+        flushSaveData();
     }
 
     bool isSectionFinished(int startMeasure, int endMeasure, int sectionLength) { return endMeasure - startMeasure + 1 < sectionLength; }
