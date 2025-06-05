@@ -91,6 +91,7 @@ public:
         updateMeasureDropdown(startMeasureDropdown, itemList);
         updateMeasureDropdown(endMeasureDropdown, itemList);
         updateMeasureDropdown(sectionMeasureCountDropdown, itemList);
+        updateMeasureDropdown(sectionMultiplier, itemList);
 
         if (notifySectionView)
             updateSection();
@@ -209,8 +210,14 @@ public:
     juce::ComboBox startMeasureDropdown;
     juce::ComboBox endMeasureDropdown;
     juce::ComboBox sectionMeasureCountDropdown;
+
     juce::TextButton previousSection{ "<" };
     juce::TextButton nextSection{ ">" };
+
+    juce::ComboBox sectionMultiplier;
+    juce::TextButton previousSectionMultiplier{ "<" };
+    juce::TextButton nextSectionMultiplier{ ">" };
+
     juce::TextEditor currentSectionView;
 
 private:

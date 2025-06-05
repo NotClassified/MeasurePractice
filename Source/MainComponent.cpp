@@ -51,11 +51,25 @@ MainComponent::MainComponent()
     {
         changeSection(-1);
     };
-
     addAndMakeVisible(nextSection);
     nextSection.onClick = [=]
     {
         changeSection(1);
+    };
+
+
+    addAndMakeVisible(sectionMultiplier);
+    sectionMultiplier.setEditableText(false);
+
+    addAndMakeVisible(previousSectionMultiplier);
+    previousSectionMultiplier.onClick = [=]
+    {
+        changeSection(-1 * sectionMultiplier.getSelectedId());
+    };
+    addAndMakeVisible(nextSectionMultiplier);
+    nextSectionMultiplier.onClick = [=]
+    {
+        changeSection(sectionMultiplier.getSelectedId());
     };
 
     addAndMakeVisible(titleManager.addTitle(currentSectionView, "Current Section"));
@@ -109,6 +123,12 @@ void MainComponent::resized()
         Bounds bounds2 = localBounds.removeFromTop(25);
         previousSection.setBounds(bounds2.removeFromLeft(25));
         nextSection.setBounds(bounds2.removeFromLeft(25));
+
+        bounds2.removeFromLeft(25);
+
+        previousSectionMultiplier.setBounds(bounds2.removeFromLeft(25));
+        sectionMultiplier.setBounds(bounds2.removeFromLeft(50));
+        nextSectionMultiplier.setBounds(bounds2.removeFromLeft(25));
     }
     currentSectionView.setBounds(localBounds.removeFromTop(25).removeFromLeft(200));
 }
