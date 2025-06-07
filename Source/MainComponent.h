@@ -23,6 +23,7 @@ public:
         saveData.setProperty(XmlID::EndMeasure, endMeasureDropdown.getSelectedId(), nullptr);
         saveData.setProperty(XmlID::SectionMeasureCount, sectionMeasureCountDropdown.getSelectedId(), nullptr);
         saveData.setProperty(XmlID::CurrentSection, currentSectionIndex, nullptr);
+        saveData.setProperty(XmlID::SectionMultiplier, sectionMultiplierDropdown.getSelectedId(), nullptr);
 
         juce::File saveFile(getSavePath() + "\\SaveData.xml");
         saveFile.create();
@@ -51,6 +52,7 @@ public:
         applyLoadedData(saveData.getProperty(XmlID::EndMeasure), endMeasureDropdown);
         applyLoadedData(saveData.getProperty(XmlID::SectionMeasureCount), sectionMeasureCountDropdown);
         applyLoadedData(saveData.getProperty(XmlID::CurrentSection), currentSectionIndex);
+        applyLoadedData(saveData.getProperty(XmlID::SectionMultiplier), sectionMultiplierDropdown);
     }
 
     juce::ValueTree saveData;
@@ -63,6 +65,7 @@ public:
         inline static const char* EndMeasure = "EndMeasure";
         inline static const char* SectionMeasureCount = "SectionMeasureCount";
         inline static const char* CurrentSection = "CurrentSection";
+        inline static const char* SectionMultiplier = "SectionMultiplier";
 
     };
 
@@ -91,7 +94,7 @@ public:
         updateMeasureDropdown(startMeasureDropdown, itemList);
         updateMeasureDropdown(endMeasureDropdown, itemList);
         updateMeasureDropdown(sectionMeasureCountDropdown, itemList);
-        updateMeasureDropdown(sectionMultiplier, itemList);
+        updateMeasureDropdown(sectionMultiplierDropdown, itemList);
 
         if (notifySectionView)
             updateSection();
@@ -214,7 +217,7 @@ public:
     juce::TextButton previousSection{ "<" };
     juce::TextButton nextSection{ ">" };
 
-    juce::ComboBox sectionMultiplier;
+    juce::ComboBox sectionMultiplierDropdown;
     juce::TextButton previousSectionMultiplier{ "<" };
     juce::TextButton nextSectionMultiplier{ ">" };
 
